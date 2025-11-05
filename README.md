@@ -81,7 +81,3 @@ Dự án sử dụng một loạt các công nghệ hiện đại cho cả front
     ```bash
     npm start
     ```
-
-## 👥 Nhóm thực hiện
-* **Quy mô nhóm:** 3 người
-* **Vai trò:** Lập trình viên Fullstack
