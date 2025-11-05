@@ -4,26 +4,26 @@
 
 **Kho lưu trữ:** [https://github.com/MinhPham204/TourManagement](https://github.com/MinhPham204/TourManagement)
 
-## 🚀 Các tính năng chính
+## Các tính năng chính
 
-### 👤 Tính năng cho Khách hàng
+### Tính năng cho Khách hàng
 * **Quản lý tài khoản:** Đăng ký, đăng nhập và quản lý thông tin cá nhân.
 * **Tìm kiếm nâng cao:** Duyệt, tìm kiếm và lọc các tour theo điểm đến, giá cả, thời gian, v.v.
 * **Trang chi tiết Tour:** Xem thông tin đầy đủ, lịch trình và hình ảnh của tour.
 * **Hệ thống Đặt tour:** Luồng công việc đặt tour và theo dõi thanh toán trực tuyến an toàn.
 * **Đánh giá & Xếp hạng:** Khách hàng có thể gửi đánh giá và xếp hạng cho các tour đã hoàn thành.
 
-### 💼 Trang tổng quan (Dashboard) cho Quản trị viên
+### Trang tổng quan (Dashboard) cho Quản trị viên
 * **Quản lý Tour:** Đầy đủ chức năng CRUD (Thêm, Đọc, Sửa, Xóa) cho các tour.
 * **Quản lý Khách hàng:** Xem và quản lý tài khoản khách hàng.
 * **Quản lý Đặt tour:** Phê duyệt hoặc hủy bỏ các đơn đặt tour của khách hàng.
 * **Thống kê:** Xem thống kê về doanh thu và tổng số lượt đặt tour.
 * **Kiểm duyệt Đánh giá:** Phê duyệt hoặc xóa các đánh giá do khách hàng gửi.
 
-### ⚡ Tính năng Thời gian thực (Real-time)
+### Tính năng Thời gian thực (Real-time)
 * **Thông báo trực tiếp:** Sử dụng **Socket.io** để cung cấp thông báo tức thì cho người dùng và quản trị viên (ví dụ: có đơn đặt tour mới, đơn tour đã được duyệt).
 
-## 🛠️ Công nghệ sử dụng
+## Công nghệ sử dụng
 
 Dự án sử dụng một loạt các công nghệ hiện đại cho cả frontend và backend.
 
