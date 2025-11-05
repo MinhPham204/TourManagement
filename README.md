@@ -43,7 +43,7 @@ Dự án sử dụng một loạt các công nghệ hiện đại cho cả front
 * **Bcrypt.js:** Thư viện để băm mật khẩu người dùng một cách an toàn.
 * **Socket.io:** Cho phép giao tiếp hai chiều, thời gian thực giữa máy khách và máy chủ.
 
-## 🏁 Bắt đầu (Cài đặt)
+## Bắt đầu (Cài đặt)
 
 Để chạy dự án này trên máy cục bộ của bạn, hãy làm theo các bước chung sau:
 
