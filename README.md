@@ -1,6 +1,6 @@
-# Website Quản lý Tour Du lịch (Fullstack)
+# Website Quản lý Tour Du lịch
 
-Đây là một trang web đặt tour du lịch fullstack được phát triển cho một công ty lữ hành. Dự án được xây dựng theo nhóm (3 thành viên) và bao gồm các luồng nghiệp vụ hoàn chỉnh cho cả khách hàng và quản trị viên, tích hợp cả thông báo theo thời gian thực.
+Đây là một trang web đặt tour du lịch fullstack được phát triển cho một công ty lữ hành. Dự án được xây dựng theo nhóm gồm 3 thành viên và bao gồm các luồng nghiệp vụ hoàn chỉnh cho cả khách hàng và quản trị viên, tích hợp cả thông báo theo thời gian thực.
 
 **Kho lưu trữ:** [https://github.com/MinhPham204/TourManagement](https://github.com/MinhPham204/TourManagement)
 
@@ -76,7 +76,7 @@ Dự án sử dụng một loạt các công nghệ hiện đại cho cả front
     ```bash
     npm install
     ```
-3.  Đảm bảo frontend được cấu hình để kết nối với API backend của bạn (ví dụ: qua proxy trong `package.json` hoặc đặt biến môi trường).
+3.  Đảm bảo frontend được cấu hình để kết nối với API backend (ví dụ: qua proxy trong `package.json` hoặc đặt biến môi trường).
 4.  Khởi động ứng dụng React:
     ```bash
     npm start
