@@ -1,6 +1,6 @@
 # Website Quản lý Tour Du lịch
 
-Đây là một trang web đặt tour du lịch fullstack được phát triển cho một công ty lữ hành. Dự án được xây dựng theo nhóm gồm 3 thành viên và bao gồm các luồng nghiệp vụ hoàn chỉnh cho cả khách hàng và quản trị viên, tích hợp cả thông báo theo thời gian thực.
+Đây là một trang web đặt tour du lịch được phát triển cho một công ty lữ hành. Dự án được xây dựng theo nhóm gồm 3 thành viên và bao gồm các luồng nghiệp vụ hoàn chỉnh cho cả khách hàng và quản trị viên, tích hợp cả thông báo theo thời gian thực.
 
 **Kho lưu trữ:** [https://github.com/MinhPham204/TourManagement](https://github.com/MinhPham204/TourManagement)
 
@@ -21,7 +21,7 @@
 * **Kiểm duyệt Đánh giá:** Phê duyệt hoặc xóa các đánh giá do khách hàng gửi.
 
 ### Tính năng Thời gian thực (Real-time)
-* **Thông báo trực tiếp:** Sử dụng **Socket.io** để cung cấp thông báo tức thì cho người dùng và quản trị viên (ví dụ: có đơn đặt tour mới, đơn tour đã được duyệt).
+* **Thông báo trực tiếp:** Sử dụng **Socket.io** để cung cấp thông báo tức thì cho người dùng và quản trị viên (có đơn đặt tour mới, đơn tour đã được duyệt).
 
 ## Công nghệ sử dụng
 
@@ -52,10 +52,10 @@ Dự án sử dụng một loạt các công nghệ hiện đại cho cả front
 * MongoDB (Một phiên bản cục bộ hoặc chuỗi kết nối Atlas)
 
 ### **Cài đặt Backend**
-1.  Sao chép kho lưu trữ và điều hướng đến thư mục backend.
+1.  Sao chép kho lưu trữ và điều hướng đến thư mục server.
     ```bash
     git clone [https://github.com/MinhPham204/TourManagement.git](https://github.com/MinhPham204/TourManagement.git)
-    cd TourManagement/backend 
+    cd TourManagement/server 
     ```
 2.  Cài đặt các gói phụ thuộc:
     ```bash
@@ -68,9 +68,9 @@ Dự án sử dụng một loạt các công nghệ hiện đại cho cả front
     ```
 
 ### **Cài đặt Frontend**
-1.  Điều hướng đến thư mục frontend:
+1.  Điều hướng đến thư mục client:
     ```bash
-    cd ../frontend
+    cd ../client
     ```
 2.  Cài đặt các gói phụ thuộc:
     ```bash
