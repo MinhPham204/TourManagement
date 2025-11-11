@@ -802,7 +802,7 @@ const AdminDashboard = () => {
                     title="Tổng đơn đặt"
                     value={statistics.bookings?.totalBookings || 0}
                     icon={<FaUsers />}
-                    color="primary"
+                    color="info"
                   />
                 </Col>
                 <Col md={3}>
@@ -1634,6 +1634,7 @@ const AdminDashboard = () => {
                         value={tourData.startDate}
                         onChange={(e) => setTourData({ ...tourData, startDate: e.target.value })}
                         required
+
                       />
                     </Form.Group>
                   </Col>
@@ -1731,7 +1732,7 @@ const AdminDashboard = () => {
                     onChange={(e) =>
                       setTourData({
                         ...tourData,
-                        highlights: e.target.value.split("\n").filter((s) => s.trim() !== ""),
+                        highlights: e.target.value.split("\n"),
                       })
                     }
                     placeholder="Ví dụ:&#10;Khám phá vịnh Hạ Long&#10;Thăm động Thiên Cung&#10;Trải nghiệm kayak"
@@ -1747,7 +1748,7 @@ const AdminDashboard = () => {
                     onChange={(e) =>
                       setTourData({
                         ...tourData,
-                        included: e.target.value.split("\n").filter((s) => s.trim() !== ""),
+                        included: e.target.value.split("\n"),
                       })
                     }
                     placeholder="Ví dụ:&#10;Khách sạn 4 sao&#10;Ăn 3 bữa/ngày&#10;Hướng dẫn viên"
@@ -1763,7 +1764,7 @@ const AdminDashboard = () => {
   onChange={(e) =>
     setTourData({
       ...tourData,
-      excluded: e.target.value.split("\n").filter((s) => s.trim() !== ""),
+      excluded: e.target.value.split("\n"),
     })
   }
   placeholder={`Ví dụ:\nVé máy bay quốc tế\nChi phí cá nhân\nBảo hiểm du lịch`}
@@ -1780,7 +1781,7 @@ const AdminDashboard = () => {
                     onChange={(e) =>
                       setTourData({
                         ...tourData,
-                        services: e.target.value.split("\n").filter((s) => s.trim() !== ""),
+                        services: e.target.value.split("\n"),
                       })
                     }
                     placeholder="Ví dụ:&#10;Xe đưa đón sân bay&#10;Nước suối miễn phí&#10;WiFi trên xe"

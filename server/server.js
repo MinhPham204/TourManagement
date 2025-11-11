@@ -22,23 +22,20 @@ const io = new Server(server, {
     }
 });
 
-// --- LOGIC QUẢN LÝ USER VÀ SOCKET ---
 let onlineUsers = [];
 
-// Hàm thêm người dùng vào danh sách online
+// thêm người dùng vào danh sách online
 const addUser = (userData) => {
-    // userData phải có dạng { userId, socketId, role }
-    // Không thêm nếu user đã tồn tại để tránh trùng lặp
     !onlineUsers.some(user => user.userId === userData.userId) &&
         onlineUsers.push(userData);
 };
 
-// Hàm xóa người dùng khi ngắt kết nối
+// xóa người dùng khi ngắt kết nối
 const removeUser = (socketId) => {
     onlineUsers = onlineUsers.filter(user => user.socketId !== socketId);
 };
 
-// Hàm tìm thông tin socket của một người dùng
+// tìm thông tin socket của một người dùng
 const getUser = (userId) => {
     return onlineUsers.find(user => user.userId === userId);
 };
@@ -63,22 +60,20 @@ io.on("connection", (socket) => {
         io.emit("getUsers", onlineUsers);
     });
 });
-// --- KẾT THÚC LOGIC SOCKET.IO ---
-
 
 // Middlewares
 app.use(cors())
 app.use(express.json({limit :"10mb"}))
 app.use(express.urlencoded({ extended: true,limit:"10mb" }))
 
-// Middleware để "gắn" io và getUser vào mỗi request, giúp các route có thể sử dụng
+// gắn io và getUser vào mỗi request, giúp các route có thể sử dụng
 app.use((req, res, next) => {
     req.io = io;
     req.getUser = getUser;
     next();
 });
 
-// Serve static files (ví dụ: hình ảnh đã upload)
+// Serve static files 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
@@ -87,7 +82,6 @@ app.use("/api/tours", require("./routes/tours"))
 app.use("/api/bookings", require("./routes/bookings"))
 app.use("/api/reviews", require("./routes/reviews"))
 app.use("/api/statistics", require("./routes/statistics"))
-app.use("/api/related-tours", require("./routes/related-tours"))
 app.use('/api/notifications', require('./routes/notifications'));
 
 
