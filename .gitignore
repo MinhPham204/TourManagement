@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/qdrant_storage
 client/node_modules/
 server/node_modules/
 # next.js
