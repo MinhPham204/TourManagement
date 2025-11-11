@@ -1,135 +1,83 @@
-# Hệ thống Quản lý Tour Du lịch
+# Website Quản lý Tour Du lịch
 
-Một ứng dụng web hoàn chỉnh để quản lý tour du lịch được xây dựng với ReactJS, NodeJS, ExpressJS và MongoDB.
+Đây là một trang web đặt tour du lịch được phát triển cho một công ty lữ hành. Dự án được xây dựng theo nhóm gồm 3 thành viên và bao gồm các luồng nghiệp vụ hoàn chỉnh cho cả khách hàng và quản trị viên, tích hợp cả thông báo theo thời gian thực.
 
-## Cấu trúc dự án
+**Kho lưu trữ:** [https://github.com/MinhPham204/TourManagement](https://github.com/MinhPham204/TourManagement)
 
-\`\`\`
-tour-management-system/
-├── server/                 # Backend API
-│   ├── config/            # Cấu hình database
-│   ├── models/            # MongoDB models
-│   ├── routes/            # API routes
-│   ├── middleware/        # Authentication middleware
-│   ├── scripts/           # Database seeding scripts
-│   ├── .env              # Environment variables
-│   ├── package.json      # Backend dependencies
-│   └── server.js         # Main server file
-├── client/                # Frontend React app
-│   ├── public/           # Static files
-│   ├── src/              # React source code
-│   │   ├── components/   # Reusable components
-│   │   ├── contexts/     # React contexts
-│   │   ├── pages/        # Page components
-│   │   ├── services/     # API services
-│   │   └── App.js        # Main App component
-│   ├── .env              # Frontend environment variables
-│   └── package.json      # Frontend dependencies
-└── README.md             # Documentation
-\`\`\`
+## Các tính năng chính
 
-## Tính năng chính
+### Tính năng cho Khách hàng
+* **Quản lý tài khoản:** Đăng ký, đăng nhập và quản lý thông tin cá nhân.
+* **Tìm kiếm nâng cao:** Duyệt, tìm kiếm và lọc các tour theo điểm đến, giá cả, thời gian, v.v.
+* **Trang chi tiết Tour:** Xem thông tin đầy đủ, lịch trình và hình ảnh của tour.
+* **Hệ thống Đặt tour:** Luồng công việc đặt tour và theo dõi thanh toán trực tuyến an toàn.
+* **Đánh giá & Xếp hạng:** Khách hàng có thể gửi đánh giá và xếp hạng cho các tour đã hoàn thành.
 
-### Dành cho Khách hàng:
-- ✅ Đăng ký và đăng nhập tài khoản
-- ✅ Tìm kiếm và lọc tour theo điểm đến, giá cả, thời gian
-- ✅ Xem chi tiết tour và đặt tour trực tuyến
-- ✅ Theo dõi lịch sử đặt tour và trạng thái thanh toán
-- ✅ Đánh giá tour sau khi hoàn thành
+### Trang tổng quan (Dashboard) cho Quản trị viên
+* **Quản lý Tour:** Đầy đủ chức năng CRUD (Thêm, Đọc, Sửa, Xóa) cho các tour.
+* **Quản lý Khách hàng:** Xem và quản lý tài khoản khách hàng.
+* **Quản lý Đặt tour:** Phê duyệt hoặc hủy bỏ các đơn đặt tour của khách hàng.
+* **Thống kê:** Xem thống kê về doanh thu và tổng số lượt đặt tour.
+* **Kiểm duyệt Đánh giá:** Phê duyệt hoặc xóa các đánh giá do khách hàng gửi.
 
-### Dành cho Quản trị viên:
-- ✅ Quản lý danh sách tour (thêm, sửa, xóa, xem)
-- ✅ Quản lý thông tin khách hàng
-- ✅ Xác nhận hoặc hủy đơn đặt tour
-- ✅ Thống kê số lượng tour đã được đặt
-- ✅ Tính doanh thu theo tour hoặc theo tháng
-- ✅ Kiểm duyệt đánh giá từ khách hàng
-
-## Cài đặt và chạy dự án
-
-### 1. Yêu cầu hệ thống
-- Node.js (v16 trở lên)
-- MongoDB
-- Git
-
-### 2. Cài đặt Backend
-\`\`\`bash
-cd server
-npm install
-\`\`\`
-
-### 3. Cài đặt Frontend
-\`\`\`bash
-cd client
-npm install
-\`\`\`
-
-### 4. Cấu hình môi trường
-Tạo file `.env` trong thư mục `server`:
-\`\`\`env
-MONGODB_URI=mongodb://localhost:27017/tour_management
-JWT_SECRET=your-super-secret-jwt-key
-PORT=5000
-NODE_ENV=development
-\`\`\`
-
-Tạo file `.env` trong thư mục `client`:
-\`\`\`env
-REACT_APP_API_URL=http://localhost:5000/api
-\`\`\`
-
-### 5. Khởi động MongoDB
-\`\`\`bash
-# Windows
-net start MongoDB
-
-# macOS
-brew services start mongodb-community
-
-# Linux
-sudo systemctl start mongod
-\`\`\`
-
-### 6. Tạo dữ liệu mẫu
-\`\`\`bash
-cd server
-npm run seed
-\`\`\`
-
-### 7. Chạy ứng dụng
-\`\`\`bash
-# Terminal 1 - Backend
-cd server
-npm run dev
-
-# Terminal 2 - Frontend
-cd client
-npm start
-\`\`\`
-
-### 8. Truy cập ứng dụng
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:5000/api
-- **Admin login**: admin@tourmanagement.com / admin123
+### Tính năng Thời gian thực (Real-time)
+* **Thông báo trực tiếp:** Sử dụng **Socket.io** để cung cấp thông báo tức thì cho người dùng và quản trị viên (có đơn đặt tour mới, đơn tour đã được duyệt).
 
 ## Công nghệ sử dụng
 
-### Backend:
-- **Node.js** - Runtime environment
-- **Express.js** - Web framework
-- **MongoDB** - Database
-- **Mongoose** - ODM for MongoDB
-- **JWT** - Authentication
-- **bcryptjs** - Password hashing
+Dự án sử dụng một loạt các công nghệ hiện đại cho cả frontend và backend.
 
-### Frontend:
-- **React.js** - UI library
-- **React Router** - Client-side routing
-- **Bootstrap** - CSS framework
-- **React Bootstrap** - Bootstrap components for React
-- **Axios** - HTTP client
+### **Frontend (Giao diện người dùng)**
+* **React.js:** Thư viện JavaScript để xây dựng giao diện người dùng.
+* **Bootstrap:** Framework CSS cho thiết kế đáp ứng (responsive), ưu tiên thiết bị di động.
+* **Axios:** Thư viện HTTP client dựa trên Promise để thực hiện các yêu cầu đến API.
 
-## API Endpoints
+### **Backend (Hệ thống máy chủ)**
+* **Node.js:** Môi trường thực thi JavaScript phía máy chủ.
+* **Express.js:** Framework ứng dụng web cho Node.js, được sử dụng để xây dựng RESTful API.
+* **MongoDB:** Cơ sở dữ liệu NoSQL được sử dụng để lưu trữ dữ liệu tour, người dùng và đặt chỗ.
+* **Mongoose:** Thư viện ODM (Object Data Modeling) cho MongoDB và Node.js.
 
-### Authentication
-- `POST /api/auth/register` -
+### **Xác thực & Thời gian thực**
+* **JSON Web Tokens (JWT):** Được sử dụng để bảo mật API và quản lý phiên đăng nhập của người dùng.
+* **Bcrypt.js:** Thư viện để băm mật khẩu người dùng một cách an toàn.
+* **Socket.io:** Cho phép giao tiếp hai chiều, thời gian thực giữa máy khách và máy chủ.
+
+## Bắt đầu (Cài đặt)
+
+Để chạy dự án này trên máy cục bộ của bạn, hãy làm theo các bước chung sau:
+
+### **Yêu cầu:**
+* Node.js
+* MongoDB (Một phiên bản cục bộ hoặc chuỗi kết nối Atlas)
+
+### **Cài đặt Backend**
+1.  Sao chép kho lưu trữ và điều hướng đến thư mục server.
+    ```bash
+    git clone [https://github.com/MinhPham204/TourManagement.git](https://github.com/MinhPham204/TourManagement.git)
+    cd TourManagement/server 
+    ```
+2.  Cài đặt các gói phụ thuộc:
+    ```bash
+    npm install
+    ```
+3.  Tạo tệp `.env` và thêm các biến môi trường của bạn (ví dụ: `MONGO_URI`, `JWT_SECRET`).
+4.  Khởi động máy chủ:
+    ```bash
+    npm start
+    ```
+
+### **Cài đặt Frontend**
+1.  Điều hướng đến thư mục client:
+    ```bash
+    cd ../client
+    ```
+2.  Cài đặt các gói phụ thuộc:
+    ```bash
+    npm install
+    ```
+3.  Đảm bảo frontend được cấu hình để kết nối với API backend (ví dụ: qua proxy trong `package.json` hoặc đặt biến môi trường).
+4.  Khởi động ứng dụng React:
+    ```bash
+    npm start
+    ```
