@@ -1,6 +1,6 @@
 # Website Quản lý Tour Du lịch
 
-Đây là một trang web đặt tour du lịch được phát triển cho một công ty lữ hành. Dự án được xây dựng theo nhóm gồm 3 thành viên và bao gồm các luồng nghiệp vụ hoàn chỉnh cho cả khách hàng và quản trị viên, tích hợp cả thông báo theo thời gian thực và một hệ thống gợi ý Tour thông minh bằng AI.
+Đây là một trang web đặt tour du lịch được phát triển cho một công ty lữ hành. Dự án được xây dựng theo nhóm gồm 3 thành viên và bao gồm các luồng nghiệp vụ hoàn chỉnh cho cả khách hàng và quản trị viên, tích hợp cả thông báo theo thời gian thực và một **hệ thống gợi ý Tour thông minh bằng AI**.
 
 **Kho lưu trữ:** [https://github.com/MinhPham204/TourManagement](https://github.com/MinhPham204/TourManagement)
 
@@ -58,16 +58,16 @@ Dự án sử dụng một loạt các công nghệ hiện đại cho cả front
 * Docker Desktop: Cần thiết để chạy Qdrant Vector Database.
 
 ### **Cài đặt Backend**
-1.  Sao chép kho lưu trữ và điều hướng đến thư mục server.
+1.  **Sao chép kho lưu trữ và điều hướng đến thư mục server.**
     ```bash
     git clone [https://github.com/MinhPham204/TourManagement.git](https://github.com/MinhPham204/TourManagement.git)
     cd TourManagement/server
     ```
-2.  Cài đặt các gói phụ thuộc:
+2.  **Cài đặt các gói phụ thuộc:**
     ```bash
     npm install
     ```
-3.  Tạo tệp `.env` và thêm các biến môi trường của bạn (ví dụ: `MONGODB_URI`, `JWT_SECRET`).
+3.  **Tạo tệp `.env` và thêm các biến môi trường (`MONGODB_URI`, `JWT_SECRET`)**.
 4.  **Khởi động Qdrant Vector Database:**
     * Đảm bảo Docker Desktop đang chạy.
     * Mở một terminal mới và chạy lệnh sau để khởi động Qdrant:
@@ -87,16 +87,16 @@ Dự án sử dụng một loạt các công nghệ hiện đại cho cả front
         ```
 
 ### **Cài đặt Frontend**
-1.  Điều hướng đến thư mục client:
+1.  **Điều hướng đến thư mục client:**
     ```bash
     cd ../client
     ```
-2.  Cài đặt các gói phụ thuộc:
+2.  **Cài đặt các gói phụ thuộc:**
     ```bash
     npm install
     ```
-3.  Đảm bảo frontend được cấu hình để kết nối với API backend (ví dụ: qua proxy trong `package.json` hoặc đặt biến môi trường).
-4.  Khởi động ứng dụng React:
+3.  **Đảm bảo frontend được cấu hình để kết nối với API backend (ví dụ: qua proxy trong `package.json` hoặc đặt biến môi trường).**
+4.  **Khởi động ứng dụng React:**
     ```bash
     npm start
     ```
