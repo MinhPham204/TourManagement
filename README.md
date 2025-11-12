@@ -1,6 +1,6 @@
 # Website Quản lý Tour Du lịch
 
-Đây là một trang web đặt tour du lịch được phát triển cho một công ty lữ hành. Dự án được xây dựng theo nhóm gồm 3 thành viên và bao gồm các luồng nghiệp vụ hoàn chỉnh cho cả khách hàng và quản trị viên, tích hợp cả thông báo theo thời gian thực **và một hệ thống gợi ý Tour thông minh bằng AI**.
+Đây là một trang web đặt tour du lịch được phát triển cho một công ty lữ hành. Dự án được xây dựng theo nhóm gồm 3 thành viên và bao gồm các luồng nghiệp vụ hoàn chỉnh cho cả khách hàng và quản trị viên, tích hợp cả thông báo theo thời gian thực và một hệ thống gợi ý Tour thông minh bằng AI.
 
 **Kho lưu trữ:** [https://github.com/MinhPham204/TourManagement](https://github.com/MinhPham204/TourManagement)
 
@@ -12,7 +12,7 @@
 * **Trang chi tiết Tour:** Xem thông tin đầy đủ, lịch trình và hình ảnh của tour.
 * **Hệ thống Đặt tour:** Luồng công việc đặt tour và theo dõi thanh toán trực tuyến an toàn.
 * **Đánh giá & Xếp hạng:** Khách hàng có thể gửi đánh giá và xếp hạng cho các tour đã hoàn thành.
-* **Gợi ý Tour bằng AI (**Mới**):** Tự động gợi ý các tour "tương tự" (Các tour bạn có thể thích) dựa trên sự tương đồng về ngữ nghĩa (nội dung, lịch trình, đặc điểm) của tour mà khách hàng đang xem.
+* **Gợi ý Tour bằng AI:** Tự động gợi ý các tour tương tự (Các tour khách hàng có thể thích) dựa trên sự tương đồng về ngữ nghĩa (nội dung, lịch trình, đặc điểm) của tour mà khách hàng đang xem.
 
 ### Trang tổng quan (Dashboard) cho Quản trị viên
 * **Quản lý Tour:** Đầy đủ chức năng CRUD (Thêm, Đọc, Sửa, Xóa) cho các tour.
@@ -44,7 +44,7 @@ Dự án sử dụng một loạt các công nghệ hiện đại cho cả front
 * **Bcrypt.js:** Thư viện để băm mật khẩu người dùng một cách an toàn.
 * **Socket.io:** Cho phép giao tiếp hai chiều, thời gian thực giữa máy khách và máy chủ.
 
-### Hệ thống Gợi ý AI (Vector Search) (Mới)
+### Hệ thống Gợi ý AI (Vector Search) 
 * **Qdrant:** Một Vector Database mã nguồn mở, được sử dụng để lưu trữ và truy vấn các vector ngữ nghĩa của tour với tốc độ cực nhanh.
 * **Transformers.js (@xenova/transformers):** Một thư viện AI cho phép chạy các mô hình Transformer (như `all-MiniLM-L6-v2`) trực tiếp trong Node.js để tạo vector embedding từ mô tả tour.
 
@@ -55,7 +55,7 @@ Dự án sử dụng một loạt các công nghệ hiện đại cho cả front
 ### **Yêu cầu:**
 * Node.js
 * MongoDB (Một phiên bản cục bộ hoặc chuỗi kết nối Atlas)
-* **Docker Desktop (**Mới**):** Cần thiết để chạy Qdrant Vector Database.
+* Docker Desktop: Cần thiết để chạy Qdrant Vector Database.
 
 ### **Cài đặt Backend**
 1.  Sao chép kho lưu trữ và điều hướng đến thư mục server.
@@ -68,13 +68,13 @@ Dự án sử dụng một loạt các công nghệ hiện đại cho cả front
     npm install
     ```
 3.  Tạo tệp `.env` và thêm các biến môi trường của bạn (ví dụ: `MONGODB_URI`, `JWT_SECRET`).
-4.  **Khởi động Qdrant Vector Database (**Mới**):**
+4.  **Khởi động Qdrant Vector Database:**
     * Đảm bảo Docker Desktop đang chạy.
     * Mở một terminal mới và chạy lệnh sau để khởi động Qdrant:
         ```bash
         docker run -p 6333:6333 -p 6334:6334 -v "$(pwd)/qdrant_storage:/qdrant/storage" qdrant/qdrant
         ```
-5.  **Chạy Script Vector hóa (**Mới**):**
+5.  **Chạy Script Vector hóa:**
     * (Chỉ chạy lần đầu tiên) Chạy script để "đọc" dữ liệu tour từ MongoDB và tạo vector trong Qdrant.
     * *(Hãy đảm bảo tên file script của bạn là đúng, ví dụ `embedTours_v2.mjs`)*
         ```bash
