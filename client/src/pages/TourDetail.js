@@ -30,7 +30,7 @@ function PaymentModal({ isOpen, onClose, paymentInfo, onConfirm }) {
 
   return (<Modal show={isOpen} onHide={onClose} centered size="lg" scrollable>
   <Modal.Header>
-    <Modal.Title>Thông tin thanh toán</Modal.Title>
+    <Modal.Title>Thông tin thanh toán chuyển khoản</Modal.Title>
   </Modal.Header>
   <Modal.Body>
     <Row>
@@ -117,7 +117,7 @@ function PaymentModal({ isOpen, onClose, paymentInfo, onConfirm }) {
   </Modal.Body>
   <Modal.Footer>
     <Button variant="secondary" onClick={onClose}>Hủy</Button>
-    <Button variant="primary" onClick={onConfirm}>Xác nhận</Button>
+    <Button variant="primary" onClick={onConfirm}>Đã chuyển khoản</Button>
   </Modal.Footer>
 </Modal>
 
@@ -125,7 +125,8 @@ function PaymentModal({ isOpen, onClose, paymentInfo, onConfirm }) {
 }
 
 function BookingConfirmationModal({ isOpen, onClose, bookingData, tour, user, onConfirm }) {
-  const [paymentMethod, setPaymentMethod] = useState("onTour")
+  // THAY ĐỔI: Đổi default từ "onTour" thành "cash"
+  const [paymentMethod, setPaymentMethod] = useState("cash") 
   const formatPrice = (price) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -166,28 +167,41 @@ function BookingConfirmationModal({ isOpen, onClose, bookingData, tour, user, on
             <Form>
               <FormCheck
                 type="radio"
-                label="Thanh toán khi đi tour"
+                label="Thanh toán khi đi tour (Tiền mặt)"
                 name="paymentMethod"
-                value="onTour"
-                checked={paymentMethod === "onTour"}
+                value="cash"
+                checked={paymentMethod === "cash"}
                 onChange={(e) => setPaymentMethod(e.target.value)}
                 className="mb-2"
               />
               <FormCheck
                 type="radio"
-                label="Thanh toán chuyển khoản"
+                label="Thanh toán chuyển khoản (Thủ công)"
                 name="paymentMethod"
                 value="bankTransfer"
                 checked={paymentMethod === "bankTransfer"}
                 onChange={(e) => setPaymentMethod(e.target.value)}
+                className="mb-2"
               />
+              {/* THÊM VNPAY */}
+              <FormCheck
+                type="radio"
+                label="Thanh toán VNPAY (Thanh toán trực tuyến)"
+                name="paymentMethod"
+                value="vnpay"
+                checked={paymentMethod === "vnpay"}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              />
+              {/* KẾT THÚC THÊM VNPAY */}
             </Form>
           </Card.Body>
         </Card>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={onClose}>Hủy</Button>
-        <Button variant="primary" onClick={handleConfirm}>Xác nhận</Button>
+        <Button variant="primary" onClick={handleConfirm}>
+            {paymentMethod === 'vnpay' ? 'Thanh toán ngay' : 'Xác nhận đặt tour'}
+        </Button>
       </Modal.Footer>
     </Modal>
   )
@@ -230,8 +244,11 @@ const TourDetail = () => {
   const [showPayment, setShowPayment] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [showCompletion, setShowCompletion] = useState(false)
-    const [relatedTours, setRelatedTours] = useState([])
-    const [reviewStats, setReviewStats] = useState({ averageRating: 0, totalReviews: 0 })
+  const [relatedTours, setRelatedTours] = useState([])
+  const [reviewStats, setReviewStats] = useState({ averageRating: 0, totalReviews: 0 })
+
+  // Bỏ state paymentMethod vì đã có trong modal
+  const [error, setError] = useState(null); // Giữ nguyên
 
 
   const [bookingData, setBookingData] = useState({
@@ -319,47 +336,7 @@ const TourDetail = () => {
     }
   }
 
-  // const handleBooking = async (e) => {
-  //   e.preventDefault()
 
-  //   if (!user) {
-  //     navigate("/login")
-  //     return
-  //   }
-
-  //   try {
-  //     const response = await api.post("/bookings", {
-  //       tourId: id,
-  //       numberOfPeople: bookingData.numberOfPeople,
-  //       notes: bookingData.notes,
-  //     })
-
-  //     setAlert({
-  //       show: true,
-  //       message: "Thông tin đặt tour đã được ghi nhận. Vui lòng xác nhận thông tin.",
-  //       variant: "success",
-  //     })
-
-  //     setTour((prev) => ({
-  //       ...prev,
-  //       availableSlots: prev.availableSlots - bookingData.numberOfPeople,
-  //     }))
-
-  //     setPaymentInfo({
-  //       amount: formatPrice(tour.price * bookingData.numberOfPeople),
-  //       content: tour.tourName,
-  //     })
-
-  //     setShowConfirmation(true)
-
-  //   } catch (error) {
-  //     setAlert({
-  //       show: true,
-  //       message: error.response?.data?.message || "Có lỗi xảy ra khi đặt tour",
-  //       variant: "danger",
-  //     })
-  //   }
-  // }
   const handleBooking = (e) => {
     e.preventDefault()
 
@@ -367,112 +344,96 @@ const TourDetail = () => {
       navigate("/login")
       return
     }
-
-    // Chỉ hiện modal xác nhận, chưa đặt tour
+    
+    // Kiểm tra số lượng người trước khi mở modal
+    if (bookingData.numberOfPeople <= 0 || bookingData.numberOfPeople > tour.availableSlots) {
+        setError("Số lượng người không hợp lệ.");
+        return;
+    }
+    setError(null);
     setShowConfirmation(true)
   }
-
-
-
-  // const handleConfirmation = (paymentMethod) => {
-  //   setShowConfirmation(false)
-  //   if (paymentMethod === "bankTransfer") {
-  //     setShowPayment(true)
-  //   } else {
-  //     setShowCompletion(true)
-  //   }
-  // }
-  const createBooking = async () => {
-      const response = await api.post("/bookings", {
+  
+  // Hàm tạo booking cho phương thức CASH hoặc BANK_TRANSFER (thủ công)
+  const createBooking = async (method) => {
+    const response = await api.post("/bookings", { 
+      tourId: id,
+      numberOfPeople: bookingData.numberOfPeople,
+      notes: bookingData.notes,
+      paymentMethod: method, 
+    })
+    return response.data;
+  }
+  
+  // Hàm tạo booking và chuyển hướng cho VNPAY
+  const createVnpayPayment = async () => {
+      const response = await api.post("/bookings/vnpay", {
         tourId: id,
         numberOfPeople: bookingData.numberOfPeople,
         notes: bookingData.notes,
       })
-
-      setAlert({
-        show: true,
-        message: "Đặt tour thành công! Vui lòng kiểm tra lịch sử đặt tour.",
-        variant: "success",
-      })
-
-      // Update available slots
-      setTour((prev) => ({
-        ...prev,
-        availableSlots: prev.availableSlots - bookingData.numberOfPeople,
-      }))
-}
-
-//   const handleConfirmation = async (paymentMethod) => {
-//   try {
-//     const response = await api.post("/bookings", {
-//       tourId: id,
-//       numberOfPeople: bookingData.numberOfPeople,
-//       notes: bookingData.notes,
-//     })
-
-//     // Cập nhật số chỗ còn lại
-//     setTour((prev) => ({
-//       ...prev,
-//       availableSlots: prev.availableSlots - bookingData.numberOfPeople,
-//     }))
-
-//     // Tạo dữ liệu thanh toán
-//     setPaymentInfo({
-//       amount: formatPrice(tour.price * bookingData.numberOfPeople),
-//       content: tour.tourName,
-//     })
-
-//     setShowConfirmation(false)
-
-//     if (paymentMethod === "bankTransfer") {
-//       setShowPayment(true)
-//     } else {
-//       setShowCompletion(true)
-//     }
-
-//   } catch (error) {
-//     setAlert({
-//       show: true,
-//       message: error.response?.data?.message || "Có lỗi xảy ra khi đặt tour",
-//       variant: "danger",
-//     })
-//     setShowConfirmation(false)
-//   }
-// }
-const handleConfirmation = (paymentMethod) => {
-  setShowConfirmation(false)
-
-  // 👉 ĐẶT THÔNG TIN CHUYỂN KHOẢN Ở ĐÂY
-  if (paymentMethod === "bankTransfer") {
-    setPaymentInfo({
-      amount: formatPrice(tour.price * bookingData.numberOfPeople),
-      content: tour.tourName,
-    })
-
-    setShowPayment(true)
-  } else {
-    createBooking()
-      .then(() => setShowCompletion(true))
-      .catch(error => {
-        setAlert({
-          show: true,
-          message: error.response?.data?.message || "Có lỗi xảy ra khi đặt tour",
-          variant: "danger",
-        })
-      })
+      return response.data.vnpUrl; 
   }
+
+
+// THAY ĐỔI: Xử lý logic 3 phương thức thanh toán
+const handleConfirmation = async (method) => {
+    setShowConfirmation(false)
+
+    try {
+        if (method === "vnpay") {
+            // 1. VNPAY: Tạo thanh toán và chuyển hướng
+            const vnpUrl = await createVnpayPayment();
+            window.location.href = vnpUrl; // Chuyển hướng ngay lập tức
+            return; 
+        } 
+        
+        if (method === "bankTransfer") {
+            // 2. BANK TRANSFER (Thủ công): Tạo booking và hiển thị modal thông tin chuyển khoản
+            await createBooking("bankTransfer"); 
+            
+            setPaymentInfo({
+                amount: formatPrice(tour.price * bookingData.numberOfPeople),
+                content: `THANH TOAN TOUR ${tour.tourName.toUpperCase().replace(/\s/g, '-')}`, // Tạo nội dung chuyển khoản
+            });
+            setShowPayment(true); // Hiển thị modal chuyển khoản thủ công
+            
+        } else { // 'cash'
+            // 3. CASH (Thanh toán khi đi tour): Tạo booking và hiển thị hoàn tất
+            await createBooking("cash");
+            setShowCompletion(true);
+        }
+
+        // Reset form data sau khi thành công
+        setBookingData({ numberOfPeople: 1, notes: "" });
+        
+        // Cập nhật slot (vì cả cash/bankTransfer đều trừ slot ở backend)
+        setTour((prev) => ({
+            ...prev,
+            availableSlots: prev.availableSlots - bookingData.numberOfPeople,
+        }));
+
+
+    } catch (error) {
+        setError(error.response?.data?.message || "Có lỗi xảy ra khi xử lý đặt tour.");
+        setAlert({
+            show: true,
+            message: error.response?.data?.message || "Có lỗi xảy ra khi xử lý đặt tour.",
+            variant: "danger",
+        });
+        setShowConfirmation(false);
+    }
 }
 
 
-  // const handlePaymentConfirm = () => {
-  //   setShowPayment(false)
-  //   setShowCompletion(true)
-  // }
-const handlePaymentConfirm = async () => {
-  try {
-    await createBooking()
-    setShowPayment(false)
-    setShowCompletion(true)
+  // Giữ nguyên logic cũ của handlePaymentConfirm: người dùng xác nhận đã chuyển khoản
+  const handlePaymentConfirm = async () => {
+    try {
+      // Vì booking đã được tạo ở handleConfirmation, hàm này chỉ để đóng modal và thông báo thành công.
+      // Tuy nhiên, dựa trên logic file cũ, nó gọi createBooking() ở đây, tôi sẽ giữ
+      // (Nhưng nên xem xét lại việc gọi createBooking 2 lần) -> Tối ưu hóa: bỏ createBooking trong handleConfirmation cho BankTransfer
+      setShowPayment(false)
+      setShowCompletion(true)
     } catch (error) {
       setAlert({
         show: true,
@@ -788,13 +749,13 @@ const handlePaymentConfirm = async () => {
                       placeholder="Yêu cầu đặc biệt..."
                     />
                   </Form.Group>
-
+                  {error && <Alert variant="danger" className="mt-3">{error}</Alert>}
                   <div className="mb-3">
                     <strong>Tổng tiền: {formatPrice(tour.price * bookingData.numberOfPeople)}</strong>
                   </div>
 
                   <Button type="submit" variant="primary" size="lg" className="w-100" disabled={ user?.role === "admin"}>
-                    {user ? "Đặt Tour Ngay" : "Đăng nhập để đặt tour"}
+                    {user ? "Đặt Tour" : "Đăng nhập để đặt tour"}
                   </Button>
                 </Form>
               ) : (
@@ -904,6 +865,8 @@ const handlePaymentConfirm = async () => {
         onClose={() => {
           setShowCompletion(false)
           setBookingData({ numberOfPeople: 1, notes: "" })
+          // Chuyển hướng người dùng về lịch sử đặt tour sau khi đặt thành công (trừ VNPAY)
+          navigate('/bookings');
         }}
       />
 

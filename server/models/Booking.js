@@ -37,6 +37,18 @@ const bookingSchema = new mongoose.Schema(
     notes: {
       type: String,
     },
+    paymentMethod: { // Phương thức thanh toán
+      type: String,
+      enum: ["cash", "vnpay"],
+      required: true,
+      default: "cash",
+    },
+    paymentRef: { // Mã tham chiếu giao dịch (cho VNPAY)
+        type: String,
+    },
+    vnpayOrderInfo: { // Thông tin mô tả thêm cho VNPAY
+        type: String,
+    }
   },
   {
     timestamps: true,

@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
+// THAY ĐỔI: Thêm useSearchParams
 import { Container, Row, Col, Card, Button, Alert, Badge } from "react-bootstrap"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import api from "../services/api"
 
@@ -14,6 +15,9 @@ const BookingHistory = () => {
   const [alert, setAlert] = useState({ show: false, message: "", variant: "" })
   const [currentPage, setCurrentPage] = useState(1)
   const bookingsPerPage = 6
+  
+  // THÊM: Lấy searchParams từ URL
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const indexOfLastBooking = currentPage * bookingsPerPage
   const indexOfFirstBooking = indexOfLastBooking - bookingsPerPage
@@ -22,7 +26,27 @@ const BookingHistory = () => {
 
   useEffect(() => {
     fetchBookings()
-  }, [])
+    
+    // LOGIC MỚI: Xử lý kết quả VNPAY
+    const vnpayStatus = searchParams.get('vnp_status');
+    const vnpayMessage = searchParams.get('message');
+    
+    if (vnpayStatus && vnpayMessage) {
+        // '00' là mã thành công của VNPAY. 'success' là chuỗi tôi đặt ở backend.
+        const variant = vnpayStatus === 'success' || vnpayStatus === '00' ? 'success' : 'danger'; 
+        setAlert({
+            show: true,
+            message: decodeURIComponent(vnpayMessage),
+            variant: variant,
+        });
+        
+        // Xóa tham số khỏi URL sau khi hiển thị
+        searchParams.delete('vnp_status');
+        searchParams.delete('message');
+        setSearchParams(searchParams, { replace: true }); 
+    }
+    
+  }, [searchParams]) // Thêm searchParams vào dependencies
 
   const fetchBookings = async () => {
     try {
@@ -66,9 +90,31 @@ const BookingHistory = () => {
     const statusInfo = statusMap[status] || { text: status, variant: "secondary" }
     return <Badge bg={statusInfo.variant}>{statusInfo.text}</Badge>
   }
+  
+  // Hàm hiển thị phương thức thanh toán
+  const getPaymentMethodText = (method, ref) => {
+    let text = "";
+    if (method === 'vnpay') {
+        text = 'VNPAY (Online)';
+    } else if (method === 'cash') {
+        text = 'Tiền mặt';
+    } else if (method === 'bankTransfer') {
+        text = 'Chuyển khoản thủ công';
+    } else {
+        text = 'Chưa rõ';
+    }
+
+    return (
+        <>
+            <Badge bg="secondary" className="me-2">{text}</Badge>
+            {ref && <small className="text-muted d-block mt-1">Ref: {ref}</small>}
+        </>
+    );
+  };
+
 
   return (
-    <Container>
+    <Container style={{marginTop:"82px"}}>
       <Row>
         <Col>
           <h1 className="mb-4">Lịch sử đặt tour</h1>
@@ -110,6 +156,11 @@ const BookingHistory = () => {
                       <p className="mb-1">
                         <strong>Số người:</strong> {booking.numberOfPeople}
                       </p>
+                      {/* THÊM HIỂN THỊ PHƯƠNG THỨC THANH TOÁN */}
+                      <p className="mb-2">
+                          <strong>Thanh toán:</strong> {getPaymentMethodText(booking.paymentMethod, booking.paymentRef)}
+                      </p>
+                      {/* KẾT THÚC THÊM HIỂN THỊ PHƯƠNG THỨC THANH TOÁN */}
                       <p className="mb-3">
                         <strong>Tổng tiền:</strong> {formatPrice(booking.totalAmount)}
                       </p>
