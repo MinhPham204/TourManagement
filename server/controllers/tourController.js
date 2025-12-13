@@ -4,8 +4,6 @@ const Tour = require("../models/Tour")
 const { auth, employeeAuth } = require("../middleware/auth")
 const upload = require("../middleware/upload");
 
-const router = express.Router()
-
 const qdrant = new QdrantClient({ url: 'http://localhost:6333' });
 const QDRANT_COLLECTION_NAME = 'tours';
 
@@ -262,7 +260,7 @@ const getAllToursForAdmin = async (req, res) => {
   }
 }
 
-
+// Recommend Tour
 const getSimilarTours = async (req, res) => {
   try {
     const mongoId = req.params.id; 
@@ -307,6 +305,7 @@ const getSimilarTours = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 // Get tour by ID
 const getTourById = async (req, res) => {
