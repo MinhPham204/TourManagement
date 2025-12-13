@@ -9,11 +9,11 @@ const router = express.Router()
 router.get("/categories", getTourCategories);
 // Get all tours (public)
 router.get("/", getAllTours); 
-router.get("/:id", getTourById); 
 router.get("/admin", employeeAuth, getAllToursForAdmin); 
+router.post("/", employeeAuth, upload.array("images", 5),createTour); 
+router.get("/:id", getTourById); 
 router.get("/:id/similar", getSimilarTours);
 
-router.post("/", employeeAuth, upload.array("images", 5),createTour); 
 router.put("/:id", employeeAuth, upload.array("images", 5), updateTour); 
 router.delete("/:id", employeeAuth, deleteTour); 
 

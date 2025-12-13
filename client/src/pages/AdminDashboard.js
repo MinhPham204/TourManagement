@@ -216,7 +216,7 @@ const AdminDashboard = () => {
         const response = await api.get("/bookings")
         setBookings(response.data.bookings)
       } else if (activeTab === "tours") {
-        const response = await api.get("/tours/admin")
+        const response = await api.get("/tours/admin?limit=1000")
         setTours(response.data.tours)
       } else if (activeTab === "reviews") {
         const response = await api.get("/reviews")
@@ -454,8 +454,8 @@ const AdminDashboard = () => {
       return false
     }
 
-    if (new Date(tourData.startDate) >= new Date(tourData.endDate)) {
-      showNotification("warning", "Ngày không hợp lệ", "Ngày kết thúc phải sau ngày bắt đầu")
+    if (new Date(tourData.startDate) > new Date(tourData.endDate)) {
+      showNotification("warning", "Ngày không hợp lệ", "Ngày kết thúc phải sau hoặc bằng ngày bắt đầu")
       return false
     }
 
@@ -1581,6 +1581,7 @@ const AdminDashboard = () => {
                       >
                         <option value="group">Theo đoàn</option>
                         <option value="private">Riêng tư</option>
+                        <option value="luxury">Cao cấp</option>
                         <option value="adventure">Phiêu lưu</option>
                         <option value="cultural">Văn hóa</option>
                         <option value="beach">Biển đảo</option>

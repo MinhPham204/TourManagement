@@ -266,37 +266,58 @@ const getSimilarTours = async (req, res) => {
     const mongoId = req.params.id; 
     const qdrantId = mongoIdToUUID(mongoId); 
 
-    // 1. Lấy vector của tour gốc từ Qdrant
+    // 1. Lấy vector VÀ payload của tour gốc từ Qdrant
     const originalPoint = await qdrant.retrieve(QDRANT_COLLECTION_NAME, {
       ids: [qdrantId],
-      with_vector: true
+      with_vector: true,
+      with_payload: true 
     });
 
     if (originalPoint.length === 0 || !originalPoint[0].vector) {
       return res.status(404).json("Tour không tìm thấy trong Qdrant.");
     }
+    
     const vectorToSearch = originalPoint[0].vector;
+    const payload = originalPoint[0].payload; // Lấy dữ liệu phụ (category, tourType,..)
 
-    // 2. Gọi Qdrant để tìm 6 tour tương tự (bao gồm cả chính nó)
+    // 2. Gọi Qdrant để tìm kiếm với BỘ LỌC (Hybrid Search)
     const searchResults = await qdrant.search(QDRANT_COLLECTION_NAME, {
       vector: vectorToSearch,
-      limit: 6, // Lấy 6 kết quả
-      with_payload: true // Lấy payload để có mongo_id
+      limit: 6, 
+      with_payload: true,
+
+      filter: {
+        must: [
+            {
+                key: "category",
+                match: { value: payload.category }
+            }
+        ],
+        should: [
+            {
+                key: "destination",
+                match: { value: payload.destination }
+            },
+            {
+                key: "tourType",
+                match: { value: payload.tourType }
+            }
+        ]
+      }
     });
 
-    // 3. Lọc bỏ chính nó và lấy ra các ID của MongoDB
+    // 3. Lọc bỏ chính nó và lấy ra các id khác
     const similarTourIds = searchResults
-      .filter(point => point.id !== qdrantId) // Lọc bỏ tour gốc
-      .map(point => point.payload.mongo_id); // Chỉ lấy ra ID của Mongo
+      .filter(point => point.id !== qdrantId) 
+      .map(point => point.payload.mongo_id); 
     
     if (similarTourIds.length === 0) {
-        return res.status(200).json([]); // Trả về mảng rỗng nếu không có
+        return res.status(200).json([]); 
     }
 
-    // 4. Gọi MongoDB để lấy thông tin chi tiết của 5 tour
     const similarTours = await Tour.find({
       _id: { $in: similarTourIds }
-    }).select("tourName price images destination rating"); // các field muốn hiển thị
+    }).select("tourName price images departure destination startDate endDate availableSlots rating"); 
 
     res.status(200).json(similarTours);
 

@@ -113,7 +113,7 @@ const tourSchema = new mongoose.Schema(
     },
     tourType: {
       type: String,
-      enum: ["group", "private", "family", "adventure", "cultural", "beach", "city", "nature"],
+      enum: ["group", "private", "family", "luxury", "adventure", "cultural", "beach", "city", "nature"],
       default: "group",
     },
     status: {

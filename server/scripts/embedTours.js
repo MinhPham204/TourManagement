@@ -17,6 +17,45 @@ function mongoIdToUUID(id) {
   return `${paddedId.substring(0, 8)}-${paddedId.substring(8, 12)}-${paddedId.substring(12, 16)}-${paddedId.substring(16, 20)}-${paddedId.substring(20)}`;
 }
 
+function getPriceSegment(price, duration) {
+  // Đề phòng trường hợp duration lỗi hoặc = 0, mặc định là 1 ngày
+  const days = duration && duration > 0 ? duration : 1;
+  const pricePerDay = price / days;
+
+  // Các mốc giá này bạn có thể tùy chỉnh theo thị trường thực tế
+  if (pricePerDay < 1000000) {
+    return "Phân khúc giá rẻ, tiết kiệm, bình dân, homestay, backpacking";
+  }
+  if (pricePerDay < 2500000) {
+    return "Phân khúc phổ thông, tiêu chuẩn, khách sạn 3 sao";
+  }
+  if (pricePerDay < 4500000) {
+    return "Phân khúc cao cấp, sang trọng, khách sạn 4 sao, tiện nghi";
+  }
+  return "Phân khúc hạng sang, luxury, nghỉ dưỡng 5 sao, thượng lưu, đắt đỏ";
+}
+
+
+function getSemanticTags(type) {
+  switch (type) {
+    case 'beach':
+      return "Du lịch biển đảo, tắm biển, bãi biển, đại dương, ocean, sea, beach, nghỉ dưỡng ven biển, lặn ngắm san hô, cano";
+    case 'adventure':
+      return "Du lịch mạo hiểm, leo núi, trekking, hiking, mountain, chinh phục đỉnh cao, đèo dốc, cao nguyên, thử thách";
+    case 'nature':
+      return "Khám phá thiên nhiên, rừng núi, cây cối, nature, phong cảnh, sinh thái, yên bình, thư giãn, chữa lành";
+    case 'cultural':
+      return "Văn hóa lịch sử, di sản, đền chùa, tâm linh, kiến trúc cổ, heritage, history, phố cổ, truyền thống";
+    case 'city':
+      return "Du lịch thành phố, city tour, hiện đại, mua sắm, shopping, sôi động, giải trí, công viên, nightlife";
+    case 'luxury':
+      return "Nghỉ dưỡng sang trọng, luxury, cao cấp, 5 sao, thượng lưu, resort, đắt đỏ, dịch vụ vip";
+    default:
+      return "Du lịch tham quan, trải nghiệm";
+  }
+}
+
+
 // 1. Khởi tạo
 const qdrant = new QdrantClient({ url: 'http://localhost:6333' });
 
@@ -53,12 +92,17 @@ const embedTours = async () => {
   let pointsToUpsert = [];
 
   for (const tour of tours) {
+    const priceSegment = getPriceSegment(tour.price, tour.duration);
+    const semanticTags = getSemanticTags(tour.tourType); 
+
     const textToEmbed = `
-      Tên tour: ${tour.tourName}
-      Điểm đến: ${tour.destination}
-      Lịch trình: ${tour.itinerary}
+      Chủ đề: ${semanticTags}
       Loại hình: ${tour.tourType}
-      Đặc điểm: ${tour.highlights ? tour.highlights.join(', ') : ''}
+      Phân khúc: ${priceSegment}
+      Điểm đến: ${tour.destination}, ${tour.country}
+      Tên tour: ${tour.tourName}
+      Nội dung chính: ${tour.highlights ? tour.highlights.join(', ') : ''}
+      Chi tiết lịch trình: ${tour.itinerary}
     `;
 
     // 6. Tạo vector
@@ -70,10 +114,13 @@ const embedTours = async () => {
     const qdrantId = mongoIdToUUID(mongoId);
 
     pointsToUpsert.push({
-      id: qdrantId, // 
+      id: qdrantId, 
       vector: vector,
       payload: { 
-        mongo_id: mongoId 
+        mongo_id: mongoId,
+        category: tour.category, // Ví dụ: "domestic"
+        tourType: tour.tourType,  // Ví dụ: "beach"
+        destination: tour.destination 
       }
     });
 

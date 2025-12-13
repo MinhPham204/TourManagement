@@ -156,7 +156,7 @@ function BookingConfirmationModal({ isOpen, onClose, bookingData, tour, user, on
           <Card.Body>
             <h5>Thông tin tour</h5>
             <p><strong>Tên tour:</strong> {tour?.tourName}</p>
-            <p><strong>Số lượng người:</strong> {bookingData?.numberOfPeople}</p>
+            <p><strong>Số lượng chỗ:</strong> {bookingData?.numberOfPeople}</p>
             <p><strong>Giá tiền:</strong> {formatPrice(tour?.price * bookingData?.numberOfPeople)}</p>
             <p><strong>Ghi chú:</strong> {bookingData?.notes || "Không có"}</p>
           </Card.Body>
@@ -552,15 +552,17 @@ const handleConfirmation = async (method) => {
     return ratingTexts[rating] || ""
   }
   const fetchRelatedTours = async () => {
+    if (!id) return; // Kiểm tra an toàn để đảm bảo có ID
+
     try {
-      if (tour?.destination) {
-        const response = await api.get(`/tours?destination=${encodeURIComponent(tour.destination)}&limit=4`)
-        // Filter out current tour
-        const filtered = response.data.tours.filter((t) => t._id !== id)
-        setRelatedTours(filtered.slice(0, 3))
-      }
+      const response = await api.get(`/tours/${id}/similar`);
+      const aiSuggestedTours = response.data;
+
+      setRelatedTours(aiSuggestedTours.slice(0, 4));
+
     } catch (error) {
-      console.error("Error fetching related tours:", error)
+      console.error("Error fetching related tours:", error);
+      setRelatedTours([]); 
     }
   }
 
@@ -652,14 +654,14 @@ const handleConfirmation = async (method) => {
           <Card>
              <Card.Header className="d-flex justify-content-between align-items-center mb-4">
               <div>
-                <h5 className="mb-3">
+                <h4 className="mb-3">
                   Đánh giá từ khách hàng{" "}
                   {reviewStats.totalReviews > 0 && (
                     <small className="text-muted ms-2"><i class="bi bi-star-fill text-warning"></i> 
                     {reviewStats.averageRating} / 5 ({reviewStats.totalReviews} đánh giá)
                     </small>
                   )}
-                </h5>
+                </h4>
               </div>
               {user && canReview && (
                 <Button variant="primary" size="sm" onClick={() => setShowReviewModal(true)}>
@@ -712,13 +714,13 @@ const handleConfirmation = async (method) => {
             <Card.Body>
               <div className="d-flex justify-content-center mb-3">
                 <h3 className="text-primary">{formatPrice(tour.price)}</h3>
-                <small className="text-muted">/ người</small>
+                <small className="text-muted">/ chỗ</small>
               </div>
 
               {tour.availableSlots > 0 ? (
                 <Form onSubmit={handleBooking}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Số lượng người</Form.Label>
+                    <Form.Label>Số lượng chỗ</Form.Label>
                     <Form.Control
                       type="number"
                       min="1"
@@ -771,13 +773,12 @@ const handleConfirmation = async (method) => {
           {relatedTours.length > 0 && (
             <Card>
               <Card.Header>
-                <h4 className="mb-0">Tour liên quan cùng điểm đến</h4>
-                <small className="text-muted">Các tour khác đến {tour.destination}</small>
+                <h4 className="mb-0">Tour gợi ý</h4>
               </Card.Header>
               <Card.Body>
                 <Row>
                   {relatedTours.map((relatedTour) => (
-                    <Col md={4} key={relatedTour._id} className="mb-3">
+                    <Col md={3} key={relatedTour._id} className="mb-3">
                       <Card className="h-100 shadow-sm">
                         <div style={{ height: "150px", overflow: "hidden" }}>
                           <Card.Img
@@ -828,13 +829,13 @@ const handleConfirmation = async (method) => {
                   ))}
                 </Row>
 
-                {relatedTours.length >= 3 && (
+                {relatedTours.length >= 4 && (
                   <div className="text-center mt-3">
                     <Button
                       variant="outline-primary"
                       onClick={() => navigate(`/tours?destination=${encodeURIComponent(tour.destination)}`)}
                     >
-                      Xem tất cả tour đến {tour.destination}
+                      Xem tất cả tour
                     </Button>
                   </div>
                 )}
