@@ -1,8 +1,6 @@
 const { QdrantClient } = require('@qdrant/js-client-rest');
-const express = require("express")
-const Tour = require("../models/Tour")
-const { auth, employeeAuth } = require("../middleware/auth")
-const upload = require("../middleware/upload");
+const Tour = require("../models/Tour");
+const { generateEmbedding, prepareTextForEmbedding } = require('../utils/aiUtils'); // <--- THÊM DÒNG NÀY
 
 const qdrant = new QdrantClient({ url: 'http://localhost:6333' });
 const QDRANT_COLLECTION_NAME = 'tours';
@@ -327,7 +325,6 @@ const getSimilarTours = async (req, res) => {
   }
 };
 
-
 // Get tour by ID
 const getTourById = async (req, res) => {
   try {
@@ -351,6 +348,7 @@ const calculateDuration = (startDate, endDate) => {
 }
 
 // Create tour (Admin only)
+// 1. CREATE TOUR (Đã thêm tự động tạo Vector)
 const createTour = async (req, res) => {
   try {
     const startDate = new Date(req.body.startDate)
@@ -366,35 +364,64 @@ const createTour = async (req, res) => {
     const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : []
 
     const tourData = {
-      tourId: generateTourId(),
-      tourName: req.body.tourName,
-      departure: req.body.departure,
-      destination: req.body.destination,
-      category: req.body.category,
-      region: req.body.region,
-      country: req.body.country || "Việt Nam",
-      itinerary: req.body.itinerary,  
-      startDate: startDate,
-      endDate: endDate,
-      duration: duration,
-      transportation: req.body.transportation,
-      price: Number.parseFloat(req.body.price),
-      availableSlots: Number.parseInt(req.body.availableSlots),
-      totalSlots: Number.parseInt(req.body.totalSlots) || Number.parseInt(req.body.availableSlots),
-      services: processArray(req.body.services),
-      highlights: processArray(req.body.highlights),
-      included: processArray(req.body.included),
-      excluded: processArray(req.body.excluded),
-      difficulty: req.body.difficulty || "easy",
-      tourType: req.body.tourType || "group",
-      status: req.body.status || "active",
-      featured: req.body.featured === "true" || req.body.featured === true,
-      images: images
+       // ... (Giữ nguyên logic mapping dữ liệu của bạn)
+       tourId: generateTourId(),
+       tourName: req.body.tourName,
+       departure: req.body.departure,
+       destination: req.body.destination,
+       category: req.body.category,
+       region: req.body.region,
+       country: req.body.country || "Việt Nam",
+       itinerary: req.body.itinerary,
+       startDate: startDate,
+       endDate: endDate,
+       duration: duration,
+       transportation: req.body.transportation,
+       price: Number.parseFloat(req.body.price),
+       availableSlots: Number.parseInt(req.body.availableSlots),
+       totalSlots: Number.parseInt(req.body.totalSlots) || Number.parseInt(req.body.availableSlots),
+       services: processArray(req.body.services),
+       highlights: processArray(req.body.highlights),
+       included: processArray(req.body.included),
+       excluded: processArray(req.body.excluded),
+       difficulty: req.body.difficulty || "easy",
+       tourType: req.body.tourType || "group",
+       status: req.body.status || "active",
+       featured: req.body.featured === "true" || req.body.featured === true,
+       images: images
     }
 
+    // A. Lưu vào MongoDB
     const tour = new Tour(tourData)
     await tour.save()
 
+    // B. --- AI LOGIC: Tự động tạo vector và lưu vào Qdrant ---
+    try {
+        console.log("Đang tạo vector cho tour mới...");
+        const textToEmbed = prepareTextForEmbedding(tour);
+        const vector = await generateEmbedding(textToEmbed);
+        
+        // Lưu vào Qdrant
+        await qdrant.upsert(QDRANT_COLLECTION_NAME, {
+            wait: true, // Đợi Qdrant lưu xong mới trả về response (đảm bảo real-time)
+            points: [{
+                id: mongoIdToUUID(tour._id.toString()), // Convert ID Mongo sang UUID
+                vector: vector,
+                payload: {
+                    mongo_id: tour._id.toString(), // Lưu ID gốc để map ngược lại
+                    category: tour.category,
+                    destination: tour.destination,
+                    tourType: tour.tourType,
+                    price: tour.price
+                }
+            }]
+        });
+        console.log("Đã đồng bộ tour sang Qdrant thành công!");
+    } catch (aiError) {
+        // Nếu AI lỗi, chỉ log ra console chứ KHÔNG làm lỗi request tạo tour
+        // (Tour vẫn được tạo trong Mongo, chỉ thiếu gợi ý)
+        console.error("Lỗi khi tạo vector:", aiError);
+    }
     res.status(201).json(tour)
   } catch (error) {
     console.error("Error creating tour:", error)
@@ -409,52 +436,75 @@ const updateTour = async (req, res) => {
       duration = calculateDuration(req.body.startDate, req.body.endDate)
     }
 
+    // ... (Giữ nguyên logic xử lý ảnh và dữ liệu update của bạn) ...
     const processArray = (data) => {
-      if (!data) return []
-      if (Array.isArray(data)) return data.filter((item) => item.trim() !== "")
-      return data.split("\n").filter((item) => item.trim() !== "")
+        if (!data) return []
+        if (Array.isArray(data)) return data.filter((item) => item.trim() !== "")
+        return data.split("\n").filter((item) => item.trim() !== "")
     }
-
     const newImages = req.files ? req.files.map(file => `/uploads/${file.filename}`) : []
     const imagesToRemove = req.body.imagesToRemove || []
-
-    // Fetch existing tour
+    
     const tour = await Tour.findById(req.params.id)
-    if (!tour) {
-      return res.status(404).json({ message: "Tour not found" })
-    }
+    if (!tour) return res.status(404).json({ message: "Tour not found" })
 
-    // Remove images user marked to delete
     const updatedImages = tour.images.filter(img => !imagesToRemove.includes(img)).concat(newImages)
-
+    
     const updateData = {
-      tourName: req.body.tourName,
-      departure: req.body.departure,
-      destination: req.body.destination,
-      category: req.body.category,
-      region: req.body.region,
-      country: req.body.country || "Việt Nam",
-      itinerary: req.body.itinerary,
-      startDate: req.body.startDate,
-      endDate: req.body.endDate,
-      transportation: req.body.transportation,
-      price: req.body.price ? Number.parseFloat(req.body.price) : undefined,
-      availableSlots: req.body.availableSlots ? Number.parseInt(req.body.availableSlots) : undefined,
-      totalSlots: req.body.totalSlots ? Number.parseInt(req.body.totalSlots) : undefined,
-      services: processArray(req.body.services),
-      highlights: processArray(req.body.highlights),
-      included: processArray(req.body.included),
-      excluded: processArray(req.body.excluded),
-      difficulty: req.body.difficulty || "easy",
-      tourType: req.body.tourType || "group",
-      status: req.body.status || "active",
-      featured: req.body.featured === "true" || req.body.featured === true,
-      duration: duration,
-      images: updatedImages
+        // ... (Map dữ liệu update như code cũ của bạn)
+        tourName: req.body.tourName,
+        departure: req.body.departure,
+        destination: req.body.destination,
+        category: req.body.category,
+        region: req.body.region,
+        country: req.body.country || "Việt Nam",
+        itinerary: req.body.itinerary,
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
+        transportation: req.body.transportation,
+        price: req.body.price ? Number.parseFloat(req.body.price) : undefined,
+        availableSlots: req.body.availableSlots ? Number.parseInt(req.body.availableSlots) : undefined,
+        totalSlots: req.body.totalSlots ? Number.parseInt(req.body.totalSlots) : undefined,
+        services: processArray(req.body.services),
+        highlights: processArray(req.body.highlights),
+        included: processArray(req.body.included),
+        excluded: processArray(req.body.excluded),
+        difficulty: req.body.difficulty || "easy",
+        tourType: req.body.tourType || "group",
+        status: req.body.status || "active",
+        featured: req.body.featured === "true" || req.body.featured === true,
+        duration: duration,
+        images: updatedImages
     }
 
+    // A. Cập nhật MongoDB
     const updatedTour = await Tour.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true })
 
+    // B. --- AI LOGIC: Cập nhật lại vector trong Qdrant ---
+    // (Chỉ cần chạy nếu các trường quan trọng bị thay đổi)
+    try {
+        console.log("Đang cập nhật vector...");
+        const textToEmbed = prepareTextForEmbedding(updatedTour);
+        const vector = await generateEmbedding(textToEmbed);
+
+        await qdrant.upsert(QDRANT_COLLECTION_NAME, {
+            wait: true,
+            points: [{
+                id: mongoIdToUUID(updatedTour._id.toString()), // Ghi đè lên ID cũ
+                vector: vector,
+                payload: {
+                    mongo_id: updatedTour._id.toString(),
+                    category: updatedTour.category,
+                    destination: updatedTour.destination,
+                    tourType: updatedTour.tourType,
+                    price: updatedTour.price
+                }
+            }]
+        });
+        console.log("Đã cập nhật vector Qdrant!");
+    } catch (aiError) {
+        console.error("Lỗi khi cập nhật vector:", aiError);
+    }
     res.json(updatedTour)
   } catch (error) {
     console.error("Error updating tour:", error)
@@ -466,9 +516,21 @@ const updateTour = async (req, res) => {
 // Delete tour (Admin only)
 const deleteTour = async (req, res) => {
   try {
+    // A. Xóa khỏi MongoDB
     const tour = await Tour.findByIdAndDelete(req.params.id)
     if (!tour) {
       return res.status(404).json({ message: "Tour not found" })
+    }
+
+    // B. --- AI LOGIC: Xóa khỏi Qdrant ---
+    try {
+        await qdrant.delete(QDRANT_COLLECTION_NAME, {
+            wait: true,
+            points: [mongoIdToUUID(req.params.id)] // Xóa point có ID tương ứng
+        });
+        console.log("Đã xóa vector khỏi Qdrant!");
+    } catch (aiError) {
+        console.error("Lỗi khi xóa vector:", aiError);
     }
     res.json({ message: "Tour deleted successfully" })
   } catch (error) {
